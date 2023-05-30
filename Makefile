@@ -1,6 +1,9 @@
-CC=g++
+CC=clang++-9
 CFLAGS=--std=c++17 -Wall -O2
 LDFLAGS=
+
+SRC=src
+OBJ=obj
 
 SOURCES=$(wildcard $(SRC)/*.cpp)
 OBJECTS=$(SOURCES:$(SRC)/%.cpp=$(OBJ)/%.o)
@@ -13,18 +16,10 @@ clean:
 	rm obj/*
 	rm bin/*
 
-bin/dns_resolver: obj/resolver.o obj/main.o
+bin/dns_resolver: $(OBJECTS)
 	@mkdir -p bin
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@
 
 $(OBJECTS): $(OBJ)/%.o : $(SRC)/%.cpp
-	@mkdir -p obj
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/resolver.o: src/resolver.cpp
-	@mkdir -p obj
-	$(CC) $(CFLAGS) -c $< -o $@
-
-obj/main.o: src/main.cpp
-	@mkdir -p obj
+	@mkdir -p $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@
