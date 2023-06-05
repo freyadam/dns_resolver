@@ -199,11 +199,28 @@ void Record::print(std::ostream &os) {
    if (this->type == RecordType::A) {
       os << std::to_string(this->data[0]) << "." << std::to_string(this->data[1]) << "."
          << std::to_string(this->data[2]) << "." << std::to_string(this->data[3]);
+   } else if (this->type == RecordType::NS) {
+      std::size_t zero = 0;
+      os << read_name(this->data.data(), zero);
    } else {
-      os << "???";
+      os << "???";  // TODO
    }
 
    os << "]" << std::endl;
+}
+
+std::string Record::data_as_string() {
+   if (this->type == RecordType::A) {
+      std::string s = std::to_string(this->data[0]) + "." + std::to_string(this->data[1]) + "." +
+                      std::to_string(this->data[2]) + "." + std::to_string(this->data[3]);
+      return s;
+
+   } else if (this->type == RecordType::NS) {
+      std::size_t zero = 0;
+      return read_name(this->data.data(), zero);
+   } else {
+      throw std::logic_error("Not implemented");
+   }
 }
 
 Message::Message(std::vector<uint8_t> bytes) {
@@ -320,4 +337,26 @@ void Message::print(std::ostream &os) {
          record.print(os);
       }
    }
+}
+
+std::optional<std::string> Message::get_record(std::vector<Record> &v, RecordType type) {
+   auto it = std::find_if(v.begin(), v.end(), [type](Record &r) { return r.type == type; });
+
+   if (it == v.end()) {
+      return {};
+   }
+
+   return it->data_as_string();
+}
+
+std::optional<std::string> Message::get_answer_data(RecordType type) {
+   return this->get_record(this->answers, type);
+}
+
+std::optional<std::string> Message::get_authority_data(RecordType type) {
+   return this->get_record(this->authorities, type);
+}
+
+std::optional<std::string> Message::get_additional_data(RecordType type) {
+   return this->get_record(this->additionals, type);
 }

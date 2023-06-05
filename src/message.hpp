@@ -2,6 +2,7 @@
 #define DNS_RESOLVER_MESSAGE_H
 
 #include <cstddef>
+#include <optional>
 #include <ostream>
 #include <stdint.h>
 #include <string>
@@ -37,6 +38,7 @@ struct Record {
    Record(uint8_t *data, std::size_t &position);
    std::vector<uint8_t> encode();
    void print(std::ostream &os);
+   std::string data_as_string();
 };
 
 // A complete message representing either a query or a response.
@@ -52,6 +54,13 @@ struct Message {
    Message(std::string name, RecordType type, uint16_t flags = 0);
    std::vector<uint8_t> encode();
    void print(std::ostream &os);
+
+   std::optional<std::string> get_answer_data(RecordType type);
+   std::optional<std::string> get_authority_data(RecordType type);
+   std::optional<std::string> get_additional_data(RecordType type);
+
+ private:
+   std::optional<std::string> get_record(std::vector<Record> &v, RecordType type);
 };
 
 #endif  // DNS_RESOLVER_MESSAGE_H
